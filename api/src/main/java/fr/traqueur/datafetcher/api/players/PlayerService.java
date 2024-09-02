@@ -1,8 +1,6 @@
-package fr.traqueur.datafetcher.api.services;
+package fr.traqueur.datafetcher.api.players;
 
 import fr.traqueur.datafetcher.exceptions.PlayerAlreadyExistException;
-import fr.traqueur.datafetcher.api.models.PlayerData;
-import fr.traqueur.datafetcher.api.repositories.PlayerRepository;
 import fr.traqueur.datafetcher.exceptions.PlayerNotExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +31,7 @@ public class PlayerService {
 
     public void deletePlayer(UUID uuid) {
         if (!this.repository.existsById(uuid)) {
-            throw new IllegalStateException("Player with "+ uuid + " not found.");
+            throw new IllegalStateException("Player with " + uuid + " not found.");
         }
         this.repository.deleteById(uuid);
     }
@@ -54,6 +52,6 @@ public class PlayerService {
 
     public PlayerData getPlayer(UUID uuid) throws PlayerNotExistsException {
         return this.repository.findById(uuid)
-                .orElseThrow(() -> new PlayerNotExistsException("Player with "+ uuid + " not found."));
+                .orElseThrow(() -> new PlayerNotExistsException("Player with " + uuid + " not found."));
     }
 }

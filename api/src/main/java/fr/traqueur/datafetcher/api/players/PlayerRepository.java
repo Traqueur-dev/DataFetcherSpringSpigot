@@ -1,6 +1,5 @@
-package fr.traqueur.datafetcher.api.repositories;
+package fr.traqueur.datafetcher.api.players;
 
-import fr.traqueur.datafetcher.api.models.PlayerData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

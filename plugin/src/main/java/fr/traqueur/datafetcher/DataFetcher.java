@@ -15,6 +15,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.FutureTask;
+import java.util.function.Consumer;
 
 public final class DataFetcher extends JavaPlugin {
 
@@ -23,14 +26,15 @@ public final class DataFetcher extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        this.webClient = this.buildWebClient();
-        this.playerManager = new PlayerManager(this.webClient, this);
-
         CommandManager commandsManager = new CommandManager(this);
         commandsManager.registerCommand(new PlayerCommand(this));
+        buildWebClient().thenAccept(webClient -> {
+            this.webClient = webClient;
+            this.playerManager = new PlayerManager(this.webClient, this);
+            this.getServer().getPluginManager().registerEvents(new PlayerListener(this.playerManager), this);
 
-        this.getServer().getPluginManager().registerEvents(new PlayerListener(this.playerManager), this);
-        this.getLogger().info("DataFetcher has been enabled.");
+            this.getLogger().info("DataFetcher has been enabled.");
+        });
     }
 
     @Override
@@ -48,14 +52,29 @@ public final class DataFetcher extends JavaPlugin {
 
     }
 
-    private WebClient buildWebClient() {
+    private CompletableFuture<WebClient> buildWebClient() {
         String baseUrl = "http://localhost:8080/api/v1";
-        return WebClient.builder()
+        return getToken(baseUrl).thenApply(token -> WebClient.builder()
                 .filter(this.errorHandler())
                 .baseUrl(baseUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .defaultUriVariables(Collections.singletonMap("url", baseUrl))
+                .build());
+    }
+
+    private CompletableFuture<String> getToken(String baseUrl) {
+        WebClient userClient = WebClient.builder()
+                .baseUrl(baseUrl)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeaders(httpHeaders -> httpHeaders.setBasicAuth("traqueur-dev", "password"))
                 .defaultUriVariables(Collections.singletonMap("url", baseUrl))
                 .build();
+        return userClient.post()
+                .uri("/auth/token")
+                .retrieve()
+                .bodyToMono(String.class)
+                .toFuture();
     }
 
     private ExchangeFilterFunction errorHandler() {
@@ -69,9 +88,6 @@ public final class DataFetcher extends JavaPlugin {
         });
     }
 
-    public WebClient getWebClient() {
-        return webClient;
-    }
 
     public PlayerManager getPlayerManager() {
         return playerManager;

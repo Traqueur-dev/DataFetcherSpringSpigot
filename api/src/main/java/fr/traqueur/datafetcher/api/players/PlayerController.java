@@ -1,8 +1,6 @@
-package fr.traqueur.datafetcher.api.controllers;
+package fr.traqueur.datafetcher.api.players;
 
 import fr.traqueur.datafetcher.exceptions.PlayerAlreadyExistException;
-import fr.traqueur.datafetcher.api.models.PlayerData;
-import fr.traqueur.datafetcher.api.services.PlayerService;
 import fr.traqueur.datafetcher.dto.PlayerDTO;
 import fr.traqueur.datafetcher.exceptions.PlayerNotExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
