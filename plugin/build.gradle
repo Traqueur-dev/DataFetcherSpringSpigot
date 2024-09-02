@@ -1,5 +1,4 @@
 repositories {
-    mavenCentral()
     maven {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
@@ -12,8 +11,18 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
+    implementation 'org.springframework:spring-webflux:6.1.12'
+    implementation "com.github.Traqueur-dev:CommandsAPI:1.5.0"
     implementation(project(":common"))
 }
+
+shadowJar {
+    archiveFileName = "${project.name}-${project.version}.jar"
+
+    relocate 'fr.traqueur.commands', 'fr.traqueur.datafetcher.commands'
+    relocate 'com.fasterxml.jackson', 'fr.traqueur.datafetcher.jackson'
+}
+
 
 def targetJavaVersion = 21
 java {
@@ -33,3 +42,5 @@ processResources {
         expand props
     }
 }
+
+build.dependsOn(shadowJar)
