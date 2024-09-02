@@ -1,0 +1,4 @@
+name: DataFetcher
+version: '1.0-SNAPSHOT'
+main: fr.traqueur.datafetcher.DataFetcher
+api-version: '1.21'

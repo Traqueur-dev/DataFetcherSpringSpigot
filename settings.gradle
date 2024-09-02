@@ -1,0 +1,6 @@
+rootProject.name = 'DataFetcher'
+
+include 'api'
+include 'common'
+include 'plugin'
+
