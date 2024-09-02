@@ -70,7 +70,7 @@ public class PlayerManager {
                 .map(this::save)
                 .toList();
 
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[onlinePlayers.size()]));
     }
 
     // Exemple pour save, retourne un CompletableFuture
