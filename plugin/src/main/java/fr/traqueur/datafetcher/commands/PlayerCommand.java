@@ -9,8 +9,12 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
 public class PlayerCommand extends Command<DataFetcher> {
+
+    private final PlayerManager playerManager;
+
     public PlayerCommand(DataFetcher plugin) {
         super(plugin, "player");
+        this.playerManager = plugin.getPlayerManager();
         this.setDescription("Retourne des informations sur un joueur.");
         this.setPermission("datafetcher.command.player");
         this.setUsage("/player <player>");
@@ -20,7 +24,6 @@ public class PlayerCommand extends Command<DataFetcher> {
 
     @Override
     public void execute(CommandSender commandSender, Arguments arguments) {
-        final PlayerManager playerManager = getPlugin().getPlayerManager();
         OfflinePlayer player = arguments.get("player");
         playerManager.get(player.getUniqueId(), playerDTO -> {
             commandSender.sendMessage("§7Informations sur le joueur §e" + player.getName() + "§7:");

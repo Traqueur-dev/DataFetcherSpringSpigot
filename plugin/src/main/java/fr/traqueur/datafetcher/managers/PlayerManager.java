@@ -14,8 +14,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collection;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class PlayerManager {
 
@@ -63,16 +65,24 @@ public class PlayerManager {
                 );
     }
 
-    public void save(Player player) {
+    public CompletableFuture<Void> saveAll(Collection<? extends Player> onlinePlayers) {
+        var futures = onlinePlayers.stream()
+                .map(this::save)
+                .toList();
+
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+    }
+
+    // Exemple pour save, retourne un CompletableFuture
+    public CompletableFuture<Void> save(Player player) {
         PlayerDTO playerDTO = toDTO(player);
-        this.restAPI.put()
+        return this.restAPI.put()
                 .uri("/players/{player_uuid}", player.getUniqueId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(gson.toJson(playerDTO))
                 .retrieve()
                 .bodyToMono(Void.class)
-                .onErrorResume(Mono::error)
-                .subscribe();
+                .toFuture();
     }
 
     public void get(UUID uuid, Consumer<PlayerDTO> consumer, Consumer<PlayerNotExistsException> errorConsumer) {
@@ -98,9 +108,5 @@ public class PlayerManager {
                 .bodyToMono(Void.class)
                 .onErrorResume(Mono::error)
                 .subscribe();
-    }
-
-    public void saveAll(Collection<? extends Player> onlinePlayers) {
-        onlinePlayers.forEach(this::save);
     }
 }

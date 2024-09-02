@@ -16,8 +16,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.FutureTask;
-import java.util.function.Consumer;
+import java.util.concurrent.ExecutionException;
 
 public final class DataFetcher extends JavaPlugin {
 
@@ -26,29 +25,40 @@ public final class DataFetcher extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        try {
+            // On pourrait faire un thenAccept mais je préfère attendre la fin de la tâche
+            this.webClient = buildWebClient().get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
+        this.playerManager = new PlayerManager(this.webClient, this);
+
         CommandManager commandsManager = new CommandManager(this);
         commandsManager.registerCommand(new PlayerCommand(this));
-        buildWebClient().thenAccept(webClient -> {
-            this.webClient = webClient;
-            this.playerManager = new PlayerManager(this.webClient, this);
-            this.getServer().getPluginManager().registerEvents(new PlayerListener(this.playerManager), this);
 
-            this.getLogger().info("DataFetcher has been enabled.");
-        });
+        this.getServer().getPluginManager().registerEvents(new PlayerListener(this.playerManager), this);
+
+        this.getLogger().info("DataFetcher has been enabled.");
     }
 
     @Override
     public void onDisable() {
-        //Little trick to save all players in a new thread to make blocking call
-        //blocking call is necessary to prevent disable before all data are saved
-        Thread thread = new Thread(() -> this.playerManager.saveAll(this.getServer().getOnlinePlayers()));
-        thread.start();
+        CompletableFuture<Void> saveTask = this.playerManager.saveAll(this.getServer().getOnlinePlayers());
+
+        saveTask.thenRun(() -> {
+            this.getLogger().info("All players have been saved.");
+            this.getLogger().info("DataFetcher has been disabled.");
+        }).exceptionally(ex -> {
+            this.getLogger().severe("An error occurred while saving players: " + ex.getMessage());
+            return null;
+        });
+
         try {
-            thread.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            saveTask.get();
+        } catch (Exception e) {
+            throw new RuntimeException("An error occurred while disabling the plugin", e);
         }
-        this.getLogger().info("DataFetcher has been disabled.");
 
     }
 
