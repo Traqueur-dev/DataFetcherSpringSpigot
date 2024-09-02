@@ -1,13 +1,11 @@
 package fr.traqueur.datafetcher.api.services;
 
+import fr.traqueur.datafetcher.exceptions.PlayerAlreadyExistException;
 import fr.traqueur.datafetcher.api.models.PlayerData;
 import fr.traqueur.datafetcher.api.repositories.PlayerRepository;
-import fr.traqueur.datafetcher.dto.PlayerDTO;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,9 +23,9 @@ public class PlayerService {
         return this.repository.findAll();
     }
 
-    public void addPlayer(PlayerData playerData) {
+    public void addPlayer(PlayerData playerData) throws PlayerAlreadyExistException {
         if (this.repository.findById(playerData.getUuid()).isPresent()) {
-            throw new IllegalStateException("Player already exists.");
+            throw new PlayerAlreadyExistException("Player already exists.");
         }
         this.repository.save(playerData);
     }
@@ -53,5 +51,9 @@ public class PlayerService {
                     return repository.save(playerData);
                 });
 
+    }
+
+    public PlayerData getPlayer(UUID uuid) {
+        return this.repository.findById(uuid).orElseThrow(() -> new IllegalStateException("Player with "+ uuid + " not found."));
     }
 }

@@ -17,11 +17,11 @@ public class PlayerData {
     private boolean operator;
     private boolean banned;
     private int level;
-    private int xp;
+    private float xp;
     private double health;
 
 
-    public PlayerData(UUID uuid, String name, boolean operator, boolean banned, int level, int xp, double health) {
+    public PlayerData(UUID uuid, String name, boolean operator, boolean banned, int level, float xp, double health) {
         this.uuid = uuid;
         this.name = name;
         this.operator = operator;
@@ -79,11 +79,11 @@ public class PlayerData {
         this.level = level;
     }
 
-    public int getXp() {
+    public float getXp() {
         return xp;
     }
 
-    public void setXp(int xp) {
+    public void setXp(float xp) {
         this.xp = xp;
     }
 

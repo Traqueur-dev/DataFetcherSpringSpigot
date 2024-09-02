@@ -12,8 +12,14 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
+    implementation 'org.springframework:spring-webflux:6.1.12'
     implementation(project(":common"))
 }
+
+shadowJar {
+    archiveFileName = "${project.name}-${project.version}.jar"
+}
+
 
 def targetJavaVersion = 21
 java {
@@ -33,3 +39,5 @@ processResources {
         expand props
     }
 }
+
+build.dependsOn(shadowJar)

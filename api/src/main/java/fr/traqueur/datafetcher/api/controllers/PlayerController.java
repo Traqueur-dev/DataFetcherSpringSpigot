@@ -1,9 +1,11 @@
 package fr.traqueur.datafetcher.api.controllers;
 
+import fr.traqueur.datafetcher.exceptions.PlayerAlreadyExistException;
 import fr.traqueur.datafetcher.api.models.PlayerData;
 import fr.traqueur.datafetcher.api.services.PlayerService;
 import fr.traqueur.datafetcher.dto.PlayerDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,9 +36,16 @@ public class PlayerController {
     }
 
     @PostMapping
-    public void addPlayer(@RequestBody PlayerDTO player) {
+    public ResponseEntity<PlayerDTO> addPlayer(@RequestBody PlayerDTO player) throws PlayerAlreadyExistException {
         this.service.addPlayer(new PlayerData(player));
+        return ResponseEntity.ok(player);
     }
+
+    @GetMapping(path = "{player_uuid}")
+    public PlayerDTO getPlayer(@PathVariable("player_uuid") UUID uuid) {
+        return this.service.getPlayer(uuid).toPlayerDTO();
+    }
+
 
     @GetMapping
     public List<PlayerDTO> getPlayers() {
