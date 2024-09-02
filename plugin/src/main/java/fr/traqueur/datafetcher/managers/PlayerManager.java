@@ -5,13 +5,17 @@ import com.google.gson.GsonBuilder;
 import fr.traqueur.datafetcher.DataFetcher;
 import fr.traqueur.datafetcher.dto.PlayerDTO;
 import fr.traqueur.datafetcher.exceptions.PlayerAlreadyExistException;
+import fr.traqueur.datafetcher.exceptions.PlayerNotExistsException;
 import org.bukkit.entity.Player;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class PlayerManager {
 
@@ -71,6 +75,22 @@ public class PlayerManager {
                 .bodyToMono(Void.class)
                 .onErrorResume(Mono::error)
                 .subscribe();
+    }
+
+    public void get(UUID uuid, Consumer<PlayerDTO> consumer, Consumer<PlayerNotExistsException> errorConsumer) {
+        this.restAPI.get()
+                .uri("/players/{player_uuid}", uuid)
+                .retrieve()
+                .toEntity(PlayerDTO.class)
+                .onErrorResume(Mono::error)
+                .subscribe(entityPlayer -> consumer.accept(entityPlayer.getBody()), error -> {
+                    if (error instanceof PlayerNotExistsException playerNotExistsException) {
+                        errorConsumer.accept(playerNotExistsException);
+                    } else {
+                        plugin.getLogger().severe("An error occurred while creating player " + uuid + " : " + error.getMessage());
+                    }
+                });
+
     }
 
     public void delete(Player player) {

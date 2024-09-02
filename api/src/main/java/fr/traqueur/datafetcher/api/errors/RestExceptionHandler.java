@@ -2,6 +2,7 @@ package fr.traqueur.datafetcher.api.errors;
 
 import fr.traqueur.datafetcher.exceptions.PlayerAlreadyExistException;
 import fr.traqueur.datafetcher.errors.Error;
+import fr.traqueur.datafetcher.exceptions.PlayerNotExistsException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -16,12 +17,18 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
 
     @ExceptionHandler(PlayerAlreadyExistException.class)
-    protected ResponseEntity<Object> handleEntityAlreadyExist(PlayerAlreadyExistException ex) {
+    protected ResponseEntity<Error> handleEntityAlreadyExist(PlayerAlreadyExistException ex) {
         Error error = new Error(HttpStatus.CONFLICT, ex.getMessage(), ex);
         return buildResponseEntity(error);
     }
 
-    private ResponseEntity<Object> buildResponseEntity(Error error) {
+    @ExceptionHandler(PlayerNotExistsException.class)
+    protected ResponseEntity<Error> handleEntityNotExist(PlayerNotExistsException ex) {
+        Error error = new Error(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        return buildResponseEntity(error);
+    }
+
+    private ResponseEntity<Error> buildResponseEntity(Error error) {
         return new ResponseEntity<>(error, error.getStatus());
     }
 }

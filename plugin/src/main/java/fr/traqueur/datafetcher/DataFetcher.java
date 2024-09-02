@@ -1,7 +1,10 @@
 package fr.traqueur.datafetcher;
 
 import com.google.common.net.HttpHeaders;
+import fr.traqueur.commands.api.CommandManager;
+import fr.traqueur.datafetcher.commands.PlayerCommand;
 import fr.traqueur.datafetcher.exceptions.PlayerAlreadyExistException;
+import fr.traqueur.datafetcher.exceptions.PlayerNotExistsException;
 import fr.traqueur.datafetcher.listeners.PlayerListener;
 import fr.traqueur.datafetcher.managers.PlayerManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -23,6 +26,9 @@ public final class DataFetcher extends JavaPlugin {
         this.webClient = this.buildWebClient();
         this.playerManager = new PlayerManager(this.webClient, this);
 
+        CommandManager commandsManager = new CommandManager(this);
+        commandsManager.registerCommand(new PlayerCommand(this));
+
         this.getServer().getPluginManager().registerEvents(new PlayerListener(this.playerManager), this);
     }
 
@@ -42,13 +48,13 @@ public final class DataFetcher extends JavaPlugin {
     }
 
     private ExchangeFilterFunction errorHandler() {
-        return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-            if (clientResponse.statusCode().isSameCodeAs(HttpStatus.CONFLICT)) {
-                return clientResponse.bodyToMono(Error.class)
-                        .flatMap(error -> Mono.error(new PlayerAlreadyExistException(error.getMessage())));
-            } else {
-                return Mono.just(clientResponse);
-            }
+        return ExchangeFilterFunction.ofResponseProcessor(clientResponse ->
+            switch (clientResponse.statusCode()) {
+                case HttpStatus.CONFLICT -> clientResponse.bodyToMono(Error.class)
+                    .flatMap(error -> Mono.error(new PlayerAlreadyExistException(error.getMessage())));
+                case HttpStatus.NOT_FOUND -> clientResponse.bodyToMono(Error.class)
+                    .flatMap(error -> Mono.error(new PlayerNotExistsException(error.getMessage())));
+                default -> Mono.just(clientResponse);
         });
     }
 

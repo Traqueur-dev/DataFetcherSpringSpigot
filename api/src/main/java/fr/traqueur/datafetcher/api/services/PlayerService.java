@@ -3,6 +3,7 @@ package fr.traqueur.datafetcher.api.services;
 import fr.traqueur.datafetcher.exceptions.PlayerAlreadyExistException;
 import fr.traqueur.datafetcher.api.models.PlayerData;
 import fr.traqueur.datafetcher.api.repositories.PlayerRepository;
+import fr.traqueur.datafetcher.exceptions.PlayerNotExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,13 +48,12 @@ public class PlayerService {
                     player.setHealth(playerData.getHealth());
                     return repository.save(player);
                 })
-                .orElseGet(() -> {
-                    return repository.save(playerData);
-                });
+                .orElseGet(() -> repository.save(playerData));
 
     }
 
-    public PlayerData getPlayer(UUID uuid) {
-        return this.repository.findById(uuid).orElseThrow(() -> new IllegalStateException("Player with "+ uuid + " not found."));
+    public PlayerData getPlayer(UUID uuid) throws PlayerNotExistsException {
+        return this.repository.findById(uuid)
+                .orElseThrow(() -> new PlayerNotExistsException("Player with "+ uuid + " not found."));
     }
 }

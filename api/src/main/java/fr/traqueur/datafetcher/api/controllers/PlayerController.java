@@ -4,6 +4,7 @@ import fr.traqueur.datafetcher.exceptions.PlayerAlreadyExistException;
 import fr.traqueur.datafetcher.api.models.PlayerData;
 import fr.traqueur.datafetcher.api.services.PlayerService;
 import fr.traqueur.datafetcher.dto.PlayerDTO;
+import fr.traqueur.datafetcher.exceptions.PlayerNotExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,8 +43,9 @@ public class PlayerController {
     }
 
     @GetMapping(path = "{player_uuid}")
-    public PlayerDTO getPlayer(@PathVariable("player_uuid") UUID uuid) {
-        return this.service.getPlayer(uuid).toPlayerDTO();
+    public ResponseEntity<PlayerDTO> getPlayer(@PathVariable("player_uuid") UUID uuid) throws PlayerNotExistsException {
+        var player = this.service.getPlayer(uuid).toPlayerDTO();
+        return ResponseEntity.ok(player);
     }
 
 
