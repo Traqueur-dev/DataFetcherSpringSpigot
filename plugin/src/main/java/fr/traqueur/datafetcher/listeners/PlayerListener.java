@@ -21,12 +21,14 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        boolean created = this.playerManager.create(player);
-        if (created) {
-            player.sendMessage(MINI_MESSAGE.deserialize("<rainbow>Bienvenue sur le serveur !"));
-        } else {
-            player.sendMessage(MINI_MESSAGE.deserialize("<rainbow>Re-bienvenue sur le serveur !"));
-        }
+        this.playerManager.create(player, created -> {
+            if (created) {
+                player.sendMessage(MINI_MESSAGE.deserialize("<rainbow>Bienvenue sur le serveur !"));
+            } else {
+                player.sendMessage(MINI_MESSAGE.deserialize("<rainbow>Re-bienvenue sur le serveur !"));
+            }
+        });
+
     }
 
     @EventHandler
