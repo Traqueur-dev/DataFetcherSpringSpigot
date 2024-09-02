@@ -30,11 +30,22 @@ public final class DataFetcher extends JavaPlugin {
         commandsManager.registerCommand(new PlayerCommand(this));
 
         this.getServer().getPluginManager().registerEvents(new PlayerListener(this.playerManager), this);
+        this.getLogger().info("DataFetcher has been enabled.");
     }
 
     @Override
     public void onDisable() {
-        this.playerManager.saveAll(this.getServer().getOnlinePlayers());
+        //Little trick to save all players in a new thread to make blocking call
+        //blocking call is necessary to prevent disable before all data are saved
+        Thread thread = new Thread(() -> this.playerManager.saveAll(this.getServer().getOnlinePlayers()));
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        this.getLogger().info("DataFetcher has been disabled.");
+
     }
 
     private WebClient buildWebClient() {
