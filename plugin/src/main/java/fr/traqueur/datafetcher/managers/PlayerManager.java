@@ -39,9 +39,8 @@ public class PlayerManager {
                 player.getHealth());
     }
 
-    public boolean create(Player player) {
+    public void create(Player player, Consumer<Boolean> consumer) {
         PlayerDTO playerDTO = toDTO(player);
-        AtomicBoolean created = new AtomicBoolean(false);
         this.restAPI.post()
                 .uri("/players")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -52,17 +51,16 @@ public class PlayerManager {
                 .subscribe(
                         entityPlayer -> {
                             plugin.getLogger().info("Player " + entityPlayer.getBody().name() + " has been created.");
-                            created.set(true);
+                            consumer.accept(true);
                         },
                         error -> {
                             if (error instanceof PlayerAlreadyExistException) {
-                                created.set(false);
+                                consumer.accept(false);
                             } else {
                                 plugin.getLogger().severe("An error occurred while creating player " + player.getName() + " : " + error.getMessage());
                             }
                         }
                 );
-        return created.get();
     }
 
     public void save(Player player) {
