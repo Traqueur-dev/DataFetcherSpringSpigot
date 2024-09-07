@@ -25,7 +25,7 @@ public class PlayerCommand extends Command<DataFetcher> {
     @Override
     public void execute(CommandSender commandSender, Arguments arguments) {
         OfflinePlayer player = arguments.get("player");
-        this.playerManager.get(player.getUniqueId(), playerDTO -> {
+        playerManager.get(player.getUniqueId(), playerDTO -> {
             commandSender.sendMessage("§7Informations sur le joueur §e" + player.getName() + "§7:");
             commandSender.sendMessage("§7UUID: §e" + playerDTO.uuid());
             commandSender.sendMessage("§7Nom: §e" + playerDTO.name());

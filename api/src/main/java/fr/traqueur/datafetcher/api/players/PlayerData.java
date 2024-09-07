@@ -1,4 +1,4 @@
-package fr.traqueur.datafetcher.api.models;
+package fr.traqueur.datafetcher.api.players;
 
 import fr.traqueur.datafetcher.dto.PlayerDTO;
 import jakarta.persistence.Entity;
@@ -45,7 +45,8 @@ public class PlayerData {
         this.health = 20.0;
     }
 
-    public PlayerData() {}
+    public PlayerData() {
+    }
 
     public UUID getUuid() {
         return uuid;
@@ -96,6 +97,6 @@ public class PlayerData {
     }
 
     public PlayerDTO toPlayerDTO() {
-        return new PlayerDTO(uuid,name,operator,banned,level,xp,health);
+        return new PlayerDTO(uuid, name, operator, banned, level, xp, health);
     }
 }
