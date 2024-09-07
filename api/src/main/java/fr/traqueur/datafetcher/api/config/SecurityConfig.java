@@ -41,7 +41,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(auth ->
+                        auth
+                                .requestMatchers("/actuator/prometheus").permitAll()
                         .requestMatchers("/api/v1/auth/token").hasRole("USER")
                         .anyRequest().hasAuthority("SCOPE_READ")
                 )
